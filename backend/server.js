@@ -1,52 +1,52 @@
-const WebSocket = require('ws');
+// server.js
+const { WebSocketServer } = require('ws');  // Changed this line
 const Speaker = require('speaker');
 const { Readable } = require('stream');
 const ffmpeg = require('fluent-ffmpeg');
 
-const server = new WebSocket.Server({ port: 8765 });
+const server = new WebSocketServer({ port: 8765 });  // And this line
 
 server.on('connection', socket => {
     console.log('Client connected');
+    
+    // Create a single persistent speaker instance for this connection
+    const speaker = new Speaker({
+        channels: 1,
+        bitDepth: 16,
+        sampleRate: 16000
+    });
+
+    // Create a readable stream that will be used throughout the connection
+    const audioStream = new Readable({
+        read() {}
+    });
+
+    // Set up the ffmpeg process for this connection
+    const ffmpegProcess = ffmpeg(audioStream)
+        .inputFormat('webm')
+        .audioFrequency(16000)
+        .audioChannels(1)
+        .format('s16le')
+        .pipe(speaker)
+        .on('error', err => {
+            console.error('Error processing audio:', err);
+        });
 
     socket.on('message', data => {
-        // Check if data is valid before processing
         if (!data || data.length === 0) {
             console.error('Received empty or invalid audio data');
             return;
         }
-
-        // Create a new readable stream for each incoming audio message
-        const audioStream = new Readable({
-            read() {}
-        });
-
+        
+        // Push new data to the stream
         audioStream.push(data);
-        audioStream.push(null);
-
-        // Create a new Speaker instance for playback
-        const speaker = new Speaker({
-            channels: 1,          // Mono audio
-            bitDepth: 16,        // 16-bit audio
-            sampleRate: 16000    // 16kHz sample rate
-        });
-
-        // Use ffmpeg to decode WebM/Opus to PCM for Speaker playback
-        const ffmpegProcess = ffmpeg(audioStream)
-            .inputFormat('webm')       // Input format
-            .audioFrequency(16000)     // Match sample rate
-            .audioChannels(1)          // Mono audio
-            .format('s16le')           // PCM format
-            .pipe(speaker)
-            .on('error', err => {
-                console.error('Error processing audio:', err);
-            })
-            .on('finish', () => {
-                console.log('Playback finished');
-            });
     });
 
     socket.on('close', () => {
         console.log('Client disconnected');
+        // Clean up resources
+        audioStream.push(null);
+        speaker.end();
     });
 });
 
