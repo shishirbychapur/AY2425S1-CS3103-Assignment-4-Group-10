@@ -1,24 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-time Push-to-Talk</title>
-    <style>
-        #pushToTalkButton {
-            padding: 20px 40px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        
-        #pushToTalkButton:active {
-            background-color: #ff0000;
-        }
-    </style>
-</head>
-<body>
-    <h1>Real-time Push-to-Talk</h1>
-    <button id="pushToTalkButton">Hold to Speak</button>
-    <script src="client.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Real-Time Voice Stream</title>
+        <link rel="stylesheet" href="client.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>Real-Time Voice Stream</h1>
+            <p class="description">
+                This Push-to-Talk (PTT) app allows students to participate in live discussions by pressing a button to
+                speak. Real-time audio is streamed directly to the instructor, enabling seamless, interactive
+                communication in large classes.
+            </p>
+            <button id="speakButton">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                    <path
+                        d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"
+                    />
+                </svg>
+            </button>
+            <p id="instruction">Press and hold to speak</p>
+            <span class="inactive" id="status">Available</span>
+        </div>
+        <script src="client.js"></script>
+    </body>
 </html>
