@@ -21,7 +21,7 @@ navigator.mediaDevices
 
         document.getElementById('speakButton').addEventListener('mousedown', () => {
             // Send control message on controlSocket
-            if (controlSocket.readyState === WebSocket.OPEN) {
+            if (controlSocket.readyState === WebSocket.OPEN && !document.getElementById('status').classList.contains('disabled')) {
                 controlSocket.send(JSON.stringify({ type: 'mouseDown' }))
                 console.log('mousedown event sent')
             }
@@ -31,7 +31,7 @@ navigator.mediaDevices
 
         document.getElementById('speakButton').addEventListener('mouseup', () => {
             mediaRecorder.stop()
-            if (controlSocket.readyState === WebSocket.OPEN) {
+            if (controlSocket.readyState === WebSocket.OPEN && !document.getElementById('status').classList.contains('disabled')) {
                 controlSocket.send(JSON.stringify({ type: 'mouseUp' }))
                 console.log('mouseup event sent')
             }
@@ -46,7 +46,13 @@ navigator.mediaDevices
 // Listen for mouseDown and mouseUp events from the control socket
 controlSocket.onmessage = (event) => {
     const data = JSON.parse(event.data)
-    if (data.type === 'mouseDown') {
+    if (data.type === 'disable') {
+        console.log('disable event received')
+        profDisableButton()
+    } else if (data.type === 'enable') {
+        console.log('enable event received')
+        enableButton()
+    } else if (data.type === 'mouseDown') {
         console.log('mouseDown event received')
         disableButton()
     } else if (data.type === 'mouseUp') {
@@ -57,6 +63,7 @@ controlSocket.onmessage = (event) => {
 
 const instruction = document.getElementById('instruction')
 const status = document.getElementById('status')
+const speakButton = document.getElementById('speakButton')
 
 // Function to disable the push-to-talk button
 function disableButton() {
@@ -70,6 +77,17 @@ function enableButton() {
     instruction.innerText = 'Press and hold to speak'
     status.innerText = 'AVAILABLE'
     status.classList.remove('active')
+    status.classList.remove('disabled')
+    speakButton.classList.remove('disabled')
+    speakButton.disabled = false
+}
+
+function profDisableButton() {
+    instruction.innerText = 'Push-to-Talk has been disabled by the professor!'
+    status.innerText = 'DISABLED'
+    status.classList.add('disabled')
+    speakButton.classList.add('disabled')
+    speakButton.disabled = true
 }
 
 // Add error handling for WebSocket connections

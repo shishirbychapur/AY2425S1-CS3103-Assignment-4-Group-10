@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Real-Time Voice Stream</title>
+        <link rel="stylesheet" href="instructor.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>Real-Time Voice Stream</h1>
+            <p class="description">
+                Professor POV: This dashboard allows the professor to enable/disable push-to-talk for the class.
+            </p>
+            <button id="speakButton" class="speakButton">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2v10" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <path d="M16.24 7.76a6 6 0 1 1-8.48 0" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+              </svg>
+            </button>
+            <span class="status active" id="status">Enabled</span>
+        </div>
+        <script src="instructor.js"></script>
+    </body>
+</html>
