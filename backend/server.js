@@ -54,7 +54,10 @@ controlServer.on('connection', socket => {
     socket.on('message', data => {
         try {
             const message = JSON.parse(data);
-            if (message.type === "mouseDown" || message.type === "mouseUp") {
+            if (message.type === "disable" || message.type === "enable") {
+                broadcastControlMessage(controlServer, message, socket);
+                console.log(message);
+            } else if (message.type === "mouseDown" || message.type === "mouseUp") {
                 // Broadcast control events to all connected control clients except the sender
                 broadcastControlMessage(controlServer, message, socket);
                 console.log(message);
