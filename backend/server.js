@@ -1,24 +1,43 @@
-const { WebSocketServer } = require('ws');
-const Speaker = require('speaker');
-const { Readable } = require('stream');
-const ffmpeg = require('fluent-ffmpeg');
+const { WebSocketServer } = require('ws')
+const Speaker = require('speaker')
+const { Readable } = require('stream')
+const ffmpeg = require('fluent-ffmpeg')
+const express = require('express')
+const path = require('path')
+const app = express()
 
-let isTalking = false;
+const staticPath = path.join(__dirname, '../frontend')
+
+app.use(express.static(staticPath))
+
+let isTalking = false
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(staticPath, 'client.html'))
+})
+
+app.get('/instructor', (req, res) => {
+    res.sendFile(path.join(staticPath, 'instructor.html'))
+})
+
+app.listen(3000, () => {
+    console.log('Server listening on port 3000')
+})
 
 // Audio WebSocket server
-const audioServer = new WebSocketServer({ port: 8765 });
-audioServer.on('connection', socket => {
-    console.log('Audio client connected');
-    
+const audioServer = new WebSocketServer({ port: 8765 })
+audioServer.on('connection', (socket) => {
+    console.log('Audio client connected')
+
     const speaker = new Speaker({
         channels: 1,
         bitDepth: 16,
-        sampleRate: 16000
-    });
+        sampleRate: 16000,
+    })
 
     const audioStream = new Readable({
-        read() {}
-    });
+        read() {},
+    })
 
     const ffmpegProcess = ffmpeg(audioStream)
         .inputFormat('webm')
@@ -26,61 +45,58 @@ audioServer.on('connection', socket => {
         .audioChannels(1)
         .format('s16le')
         .pipe(speaker)
-        .on('error', err => {
-            console.error('Error processing audio:', err);
-        });
+        .on('error', (err) => {
+            console.error('Error processing audio:', err)
+        })
 
-    socket.on('message', data => {
+    socket.on('message', (data) => {
         if (!data || data.length === 0) {
-            console.error('Received empty or invalid audio data');
-            return;
+            console.error('Received empty or invalid audio data')
+            return
         }
-        
-        audioStream.push(data);
-    });
+
+        audioStream.push(data)
+    })
 
     socket.on('close', () => {
-        console.log('Audio client disconnected');
-        audioStream.push(null);
-        speaker.end();
-    });
-});
+        console.log('Audio client disconnected')
+        audioStream.push(null)
+        speaker.end()
+    })
+})
 
 // Control WebSocket server
-const controlServer = new WebSocketServer({ port: 8766 });
-controlServer.on('connection', socket => {
-    console.log('Control client connected');
+const controlServer = new WebSocketServer({ port: 8766 })
+controlServer.on('connection', (socket) => {
+    console.log('Control client connected')
 
-    socket.on('message', data => {
+    socket.on('message', (data) => {
         try {
-            const message = JSON.parse(data);
-            if (message.type === "disable" || message.type === "enable") {
-                broadcastControlMessage(controlServer, message, socket);
-                console.log(message);
-            } else if (message.type === "mouseDown" || message.type === "mouseUp") {
+            const message = JSON.parse(data)
+            if (message.type === 'disable' || message.type === 'enable') {
+                broadcastControlMessage(controlServer, message, socket)
+            } else if (message.type === 'mouseDown' || message.type === 'mouseUp') {
                 // Broadcast control events to all connected control clients except the sender
-                broadcastControlMessage(controlServer, message, socket);
-                console.log(message);
+                broadcastControlMessage(controlServer, message, socket)
             }
         } catch (error) {
-            console.error("Error parsing control message:", error);
+            console.error('Error parsing control message:', error)
         }
-    });
+    })
 
     socket.on('close', () => {
-        console.log('Control client disconnected');
-    });
-});
+        console.log('Control client disconnected')
+    })
+})
 
 // Function to broadcast control messages to all connected clients except the sender
 function broadcastControlMessage(server, message, sender) {
-    server.clients.forEach(client => {
+    server.clients.forEach((client) => {
         if (client !== sender && client.readyState === client.OPEN) {
-            client.send(JSON.stringify(message));
+            client.send(JSON.stringify(message))
         }
-    });
+    })
 }
 
-
-console.log("Audio WebSocket server started on ws://localhost:8765");
-console.log("Control WebSocket server started on ws://localhost:8766");
+console.log('Audio WebSocket server started on ws://localhost:8765')
+console.log('Control WebSocket server started on ws://localhost:8766')
