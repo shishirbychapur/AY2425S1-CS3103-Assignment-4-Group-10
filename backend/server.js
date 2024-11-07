@@ -2,27 +2,10 @@ const { WebSocketServer } = require('ws')
 const Speaker = require('speaker')
 const { Readable } = require('stream')
 const ffmpeg = require('fluent-ffmpeg')
-const express = require('express')
-const path = require('path')
-const app = express()
-
-const staticPath = path.join(__dirname, '../frontend')
 
 app.use(express.static(staticPath))
 
 let isTalking = false
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(staticPath, 'client.html'))
-})
-
-app.get('/instructor', (req, res) => {
-    res.sendFile(path.join(staticPath, 'instructor.html'))
-})
-
-app.listen(3000, () => {
-    console.log('Server listening on port 3000')
-})
 
 // Audio WebSocket server
 const audioServer = new WebSocketServer({ port: 8765 })
