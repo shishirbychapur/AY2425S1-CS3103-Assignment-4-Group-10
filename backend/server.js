@@ -3,8 +3,6 @@ const Speaker = require('speaker')
 const { Readable } = require('stream')
 const ffmpeg = require('fluent-ffmpeg')
 
-app.use(express.static(staticPath))
-
 let isTalking = false
 
 // Audio WebSocket server
