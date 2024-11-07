@@ -1,6 +1,6 @@
 let audioContext = new (window.AudioContext || window.webkitAudioContext)()
-let audioSocket = new WebSocket('ws://localhost:8765') // Audio socket
-let controlSocket = new WebSocket('ws://localhost:8766') // Control socket
+let audioSocket = new WebSocket('ws://172.25.98.154:8765') // Audio socket
+let controlSocket = new WebSocket('ws://172.25.98.154:8766') // Control socket
 
 // Configure audio socket for binary data
 audioSocket.binaryType = 'arraybuffer'
@@ -26,7 +26,7 @@ navigator.mediaDevices
                 console.log('mousedown event sent')
             }
             mediaRecorder.start(100)
-            disableButton()
+            disableButton(true)
         })
 
         document.getElementById('speakButton').addEventListener('mouseup', () => {
@@ -54,7 +54,7 @@ controlSocket.onmessage = (event) => {
         enableButton()
     } else if (data.type === 'mouseDown') {
         console.log('mouseDown event received')
-        disableButton()
+        disableButton(false)
     } else if (data.type === 'mouseUp') {
         console.log('mouseUp event received')
         enableButton()
@@ -66,10 +66,13 @@ const status = document.getElementById('status')
 const speakButton = document.getElementById('speakButton')
 
 // Function to disable the push-to-talk button
-function disableButton() {
-    instruction.innerText = 'Student speaking!'
-    status.innerText = 'CHANNEL IN USE'
-    status.classList.add('active')
+function disableButton(isSelf) {
+  if (!isSelf) {
+    speakButton.classList.add('disabled')
+  }
+  instruction.innerText = 'Student speaking!'
+  status.innerText = 'CHANNEL IN USE'
+  status.classList.add('active')
 }
 
 // Function to enable the push-to-talk button
@@ -79,7 +82,6 @@ function enableButton() {
     status.classList.remove('active')
     status.classList.remove('disabled')
     speakButton.classList.remove('disabled')
-    speakButton.disabled = false
 }
 
 function profDisableButton() {
@@ -87,7 +89,6 @@ function profDisableButton() {
     status.innerText = 'DISABLED'
     status.classList.add('disabled')
     speakButton.classList.add('disabled')
-    speakButton.disabled = true
 }
 
 // Add error handling for WebSocket connections

@@ -94,4 +94,5 @@ h1 {
 .disabled {
     transform: none;
     background-color: #999696;
+    pointer-events: none;
 }
